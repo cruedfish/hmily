@@ -20,7 +20,7 @@ package org.dromara.hmily.core.interceptor;
 import org.aspectj.lang.ProceedingJoinPoint;
 
 /**
- * The HmilyTransactionInterceptor.
+ * The HmilyTransactionInterceptor.事务接口  springcloud dubbo等分别实现
  * @author xiaoyu
  */
 @FunctionalInterface

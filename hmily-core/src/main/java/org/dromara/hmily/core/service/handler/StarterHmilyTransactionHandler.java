@@ -62,13 +62,17 @@ public class StarterHmilyTransactionHandler implements HmilyTransactionHandler, 
             throws Throwable {
         Object returnValue;
         try {
+            //获取初始化的hmily事务
             HmilyTransaction hmilyTransaction = hmilyTransactionExecutor.begin(point);
             try {
-                //execute try
+                //尝试执行方法
                 returnValue = point.proceed();
+                //事务设置为尝试 开始准备执行分布式事务
                 hmilyTransaction.setStatus(HmilyActionEnum.TRYING.getCode());
+                //设置队列为更新状态
                 hmilyTransactionExecutor.updateStatus(hmilyTransaction);
             } catch (Throwable throwable) {
+                //如果分布式事务执行失败则取消
                 //if exception ,execute cancel
                 final HmilyTransaction currentTransaction = hmilyTransactionExecutor.getCurrentTransaction();
                 executor.execute(() -> hmilyTransactionExecutor
@@ -76,6 +80,7 @@ public class StarterHmilyTransactionHandler implements HmilyTransactionHandler, 
                 throw throwable;
             }
             //execute confirm
+            //如果分布式事务执行成功则确认
             final HmilyTransaction currentTransaction = hmilyTransactionExecutor.getCurrentTransaction();
             executor.execute(() -> hmilyTransactionExecutor.confirm(currentTransaction));
         } finally {

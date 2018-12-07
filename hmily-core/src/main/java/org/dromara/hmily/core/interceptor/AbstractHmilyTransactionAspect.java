@@ -24,7 +24,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.dromara.hmily.annotation.Hmily;
 
 /**
- * this is {@linkplain Hmily} aspect handler.
+ * this is {@linkplain Hmily} aspect handler.   优先级别最高的切面
  * @author xiaoyu
  */
 @Aspect

@@ -64,14 +64,16 @@ public class SpringCloudHmilyTransactionInterceptor implements HmilyTransactionI
         HmilyTransactionContext hmilyTransactionContext;
         RequestAttributes requestAttributes = null;
         try {
+            //获取该切点的请求
             requestAttributes = RequestContextHolder.currentRequestAttributes();
         } catch (Throwable ex) {
             LogUtil.warn(LOGGER, () -> "can not acquire request info:" + ex.getLocalizedMessage());
         }
-
+        //判断是否有携带上下文过来
         HttpServletRequest request = requestAttributes == null ? null : ((ServletRequestAttributes) requestAttributes).getRequest();
         String context = request == null ? null : request.getHeader(CommonConstant.HMILY_TRANSACTION_CONTEXT);
         if (StringUtils.isNoneBlank(context)) {
+            //应用程序上下文初始化
             hmilyTransactionContext = GsonUtils.getInstance().fromJson(context, HmilyTransactionContext.class);
         } else {
             hmilyTransactionContext = HmilyTransactionContextLocal.getInstance().get();

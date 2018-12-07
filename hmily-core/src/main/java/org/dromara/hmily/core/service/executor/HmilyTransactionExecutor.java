@@ -84,11 +84,11 @@ public class HmilyTransactionExecutor {
      */
     public HmilyTransaction begin(final ProceedingJoinPoint point) {
         LogUtil.debug(LOGGER, () -> "......hmily transaction！start....");
-        //build tccTransaction
+        //build tccTransaction  事务中有id 名字 角色 确认取消方法
         final HmilyTransaction hmilyTransaction = buildTccTransaction(point, HmilyRoleEnum.START.getCode(), null);
         //save tccTransaction in threadLocal
         CURRENT.set(hmilyTransaction);
-        //publishEvent
+        //publishEvent  发布事务到 队列中
         hmilyTransactionEventPublisher.publishEvent(hmilyTransaction, EventTypeEnum.SAVE.getCode());
         //set TccTransactionContext this context transfer remote
         HmilyTransactionContext context = new HmilyTransactionContext();
@@ -96,6 +96,7 @@ public class HmilyTransactionExecutor {
         context.setAction(HmilyActionEnum.TRYING.getCode());
         context.setTransId(hmilyTransaction.getTransId());
         context.setRole(HmilyRoleEnum.START.getCode());
+        //设置动作 角色 id 到threadlocal
         HmilyTransactionContextLocal.getInstance().set(context);
         return hmilyTransaction;
     }
@@ -206,8 +207,10 @@ public class HmilyTransactionExecutor {
         if (Objects.isNull(currentTransaction) || CollectionUtils.isEmpty(currentTransaction.getHmilyParticipants())) {
             return;
         }
+        //更新事务的action为确认
         currentTransaction.setStatus(HmilyActionEnum.CONFIRMING.getCode());
         updateStatus(currentTransaction);
+        //得到事务对应的part  有事务id和 确认取消方法
         final List<HmilyParticipant> hmilyParticipants = currentTransaction.getHmilyParticipants();
         List<HmilyParticipant> failList = Lists.newArrayListWithCapacity(hmilyParticipants.size());
         boolean success = true;
@@ -248,12 +251,14 @@ public class HmilyTransactionExecutor {
             deleteTransaction(currentTransaction);
             return;
         }
+        //从事务中拿到Part
         final List<HmilyParticipant> hmilyParticipants = filterPoint(currentTransaction);
         boolean success = true;
         List<HmilyParticipant> failList = Lists.newArrayListWithCapacity(hmilyParticipants.size());
         if (CollectionUtils.isNotEmpty(hmilyParticipants)) {
+            //取消阶段开始
             currentTransaction.setStatus(HmilyActionEnum.CANCELING.getCode());
-            //update cancel
+            //update cancel disruptor高性能队列更新
             updateStatus(currentTransaction);
             for (HmilyParticipant hmilyParticipant : hmilyParticipants) {
                 try {
@@ -262,12 +267,14 @@ public class HmilyTransactionExecutor {
                     context.setTransId(hmilyParticipant.getTransId());
                     context.setRole(HmilyRoleEnum.START.getCode());
                     HmilyTransactionContextLocal.getInstance().set(context);
+                    //执行取消方法
                     executeParticipantMethod(hmilyParticipant.getCancelHmilyInvocation());
                 } catch (Throwable e) {
                     LogUtil.error(LOGGER, "execute cancel ex:{}", () -> e);
                     success = false;
                     failList.add(hmilyParticipant);
                 } finally {
+                   // 移除事务
                     HmilyTransactionContextLocal.getInstance().remove();
                 }
             }

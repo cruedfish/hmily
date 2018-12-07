@@ -53,6 +53,7 @@ public class HmilyTransactionAspectServiceImpl implements HmilyTransactionAspect
      */
     @Override
     public Object invoke(final HmilyTransactionContext hmilyTransactionContext, final ProceedingJoinPoint point) throws Throwable {
+        //上下文为空第一次进来 ，得到StarterHmilyTransactionHandler类，调用handler方法处理
         final Class clazz = hmilyTransactionFactoryService.factoryOf(hmilyTransactionContext);
         final HmilyTransactionHandler txTransactionHandler = (HmilyTransactionHandler) SpringBeanUtils.getInstance().getBean(clazz);
         return txTransactionHandler.handler(point, hmilyTransactionContext);

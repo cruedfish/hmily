@@ -62,6 +62,7 @@ public class HmilyFeignHandler implements InvocationHandler {
                 final HmilyTransactionExecutor hmilyTransactionExecutor =
                         SpringBeanUtils.getInstance().getBean(HmilyTransactionExecutor.class);
                 final Object invoke = this.handlers.get(method).invoke(args);
+                //从
                 final HmilyParticipant hmilyParticipant = buildParticipant(hmily, method, args, hmilyTransactionContext);
                 if (hmilyTransactionContext.getRole() == HmilyRoleEnum.INLINE.getCode()) {
                     hmilyTransactionExecutor.registerByNested(hmilyTransactionContext.getTransId(),
