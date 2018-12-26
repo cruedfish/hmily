@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Objects;
 
 /**
- * HmilyRestTemplateInterceptor.
+ * HmilyRestTemplateInterceptor.  http请求拦截器，feign是通过http调用服务的，在这里进行拦截
  *
  * @author xiaoyu
  */

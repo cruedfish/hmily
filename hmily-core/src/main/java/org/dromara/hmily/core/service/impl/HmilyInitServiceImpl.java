@@ -73,6 +73,7 @@ public class HmilyInitServiceImpl implements HmilyInitService {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> LOGGER.info("hmily shutdown now")));
         try {
             loadSpiSupport(hmilyConfig);
+            //初始化Disruptor队列
             hmilyTransactionEventPublisher.start(hmilyConfig.getBufferSize(), hmilyConfig.getConsumerThreads());
             hmilyCoordinatorService.start(hmilyConfig);
         } catch (Exception ex) {

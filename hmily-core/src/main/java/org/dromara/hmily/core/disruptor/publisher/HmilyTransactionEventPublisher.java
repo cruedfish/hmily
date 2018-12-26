@@ -53,11 +53,6 @@ public class HmilyTransactionEventPublisher implements DisposableBean {
 
     private final HmilyCoordinatorService coordinatorService;
 
-    @Autowired
-    public HmilyTransactionEventPublisher(final HmilyCoordinatorService coordinatorService) {
-        this.coordinatorService = coordinatorService;
-    }
-
     /**
      * disruptor start.
      *
@@ -80,6 +75,11 @@ public class HmilyTransactionEventPublisher implements DisposableBean {
         disruptor.handleEventsWithWorkerPool(consumers);
         disruptor.setDefaultExceptionHandler(new IgnoreExceptionHandler());
         disruptor.start();
+    }
+
+    @Autowired
+    public HmilyTransactionEventPublisher(final HmilyCoordinatorService coordinatorService) {
+        this.coordinatorService = coordinatorService;
     }
 
     /**
